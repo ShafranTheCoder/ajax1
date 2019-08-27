@@ -3,9 +3,6 @@
 const API_URL = 'https://swapi.co/api/films/';
 
 const xr = new XMLHttpRequest();
-const xd = new XMLHttpRequest();
-
-
 
 xr.open('GET', API_URL);
 xr.send();
@@ -24,6 +21,7 @@ xr.onload = function () {
       filmDiv.classList.add('filmCard')
       filmDiv.dataset.index = index;
       let filmTitle = document.createElement('p')
+      filmTitle.classList.add('title');
       filmTitle.textContent = film.title;
       let filmEpizode = document.createElement('p');
       filmEpizode.textContent = film.episode_id;
@@ -38,6 +36,7 @@ xr.onload = function () {
         let loaderDiv = document.createElement('div');
         loaderDiv.classList.add('loader');
         filmDiv.appendChild(loaderDiv);
+        setTimeout(() => filmDiv.removeChild(loaderDiv), 2000);
 
         console.log(e.target.parentNode);
 
@@ -46,41 +45,28 @@ xr.onload = function () {
 
         let characterList = document.createElement('ul')
         characterList.classList.add('characterList')
-        xr.open('GET', API_URL);
-        xr.send();
-        xr.onload = function () {
 
-          if (xr.status != 200) {
-            console.log(`${xr.status}, ${xr.statusText}`);
-          } else {
-            filmDiv.removeChild(loaderDiv);
-            const responseToJSON = JSON.parse(xr.response);
-            console.log("TCL: xr.onload -> responseToJSON", responseToJSON)
-            let films = [...responseToJSON.results];
-            let heroes = films[targetFilm].characters;
-            let heroList = [];
-            console.log("TCL: xr.onload -> heroes", heroes)
-            console.log("TCL: xr.onload -> films", films)
-            heroes.forEach((hero) => {
-              xd.open('GET', hero, false);
-              xd.send();
-              xd.onload = function () {
-                if (xd.status != 200) {
-                  console.log(`${xd.status}, ${xd.statusText}`);
-                } else {
-                  const heroResult = JSON.parse(xd.response);
-                  console.log(hero);
-                  console.log("hero", heroResult);
-                  let li = document.createElement('li');
-                  li.textContent = heroResult.name;
-                  characterList.appendChild(li);
-                }
-              }
-            });
+        let charactersInFilm = [...films[targetFilm].characters];
+        console.log("TCL: xr.onload -> charactersInFilm", charactersInFilm)
+        charactersInFilm.forEach((character) => {
+          let xd = new XMLHttpRequest();
+          xd.open('GET', character);
+          xd.send();
+          xd.onload = function () {
+            if (xd.status != 200) {
+              console.log(`${xd.status}, ${xd.statusText}`);
+            } else {
+              const heroResult = JSON.parse(xd.response);
+              console.log(character);
+              console.log("hero", heroResult);
+              let li = document.createElement('li');
+              li.textContent = heroResult.name;
+              characterList.appendChild(li);
+            }
+            filmDiv.appendChild(characterList);
+            getHeroListBtn.style.display = 'none';
           }
-          filmDiv.appendChild(characterList);
-          getHeroListBtn.style.display = 'none';
-        }
+        })
       })
       filmDiv.appendChild(filmTitle);
       filmDiv.appendChild(filmEpizode);

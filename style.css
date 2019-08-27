@@ -1,13 +1,14 @@
 body {
   box-sizing: border-box;
+  font-family: 'Lexend Deca', sans-serif;
 }
 .filmCard {
   border: black solid 1px;
   padding: 5px;
   margin: 5px;
 }
-.characterList {
-
+.title {
+  font-size: 20px;
 }
 
 /* ANIMATION*/
